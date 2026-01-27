@@ -34,6 +34,7 @@ float velocity = 0;
 float gravity = 0.8;
 float jumpForce = -3.5;
 
+// Game state
 int score = 0;
 int highScore = 0;
 char bufferSC[20];
@@ -42,8 +43,8 @@ bool gameOver = false;
 
 //Pipes 
 int pipeXaxis_1 = 128;
-int pipeXaxis_2 = 168;
-int pipeXaxis_3 = 208;
+int pipeXaxis_2 = 170.6;
+int pipeXaxis_3 = 213.2;
 int pipeGap = 29;
 int pipeTopHeight_1;
 int pipeTopHeight_2;
