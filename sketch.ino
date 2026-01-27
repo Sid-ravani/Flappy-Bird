@@ -2,7 +2,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 #include <U8glib.h>
-// #include <EEPROM.h>
+
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -41,28 +41,34 @@ char bufferHi[20];
 bool gameOver = false;
 
 //Pipes 
-int pipeXaxis = 128;
+int pipeXaxis_1 = 128;
+int pipeXaxis_2 = 168;
+int pipeXaxis_3 = 208;
 int pipeGap = 29;
-int pipeTopHeight;
+int pipeTopHeight_1;
+int pipeTopHeight_2;
+int pipeTopHeight_3;
 
 void resetGame() {
   birdYaxis = 32;
   velocity = 0;
-  pipeXaxis = 128;
+  pipeXaxis_1 = 128;
+  pipeXaxis_2 = 168;
+  pipeXaxis_3 = 208;
   score = 0;
-  pipeTopHeight = random(30,55);
+  pipeTopHeight_1 = random(30,55);
+  pipeTopHeight_2 = random(30,55);
+  pipeTopHeight_3 = random(30,55);
   gameOver = false;
 }
 
 void setup() {
-  // put your setup code here, to run once:
+  
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   display.begin(SSD1306_SWITCHCAPVCC,0x3C);
   display.clearDisplay();
   display.display();
-  // Serial.begin(9600);
-
-  randomSeed(analogRead(0));
+  
   resetGame();
 
   u8g.setFont(u8g_font_tpssb);
@@ -95,6 +101,24 @@ void saveHighScore(){
   highScore = score;
 }
 
+//collision check
+void isCollision(int pipeXaxis, int pipeTopHeight){
+  // Collision with Pipe
+  if(pipeXaxis < 20 && pipeXaxis > 0){
+    if( (birdYaxis )< 64 - pipeTopHeight || birdYaxis+12 > (64-(pipeTopHeight-pipeGap))){
+      gameOver = true;
+    }
+  }
+}
+
+void Score(int* pipeXaxis, int* pipeTopHeight){
+   if(*pipeXaxis < 0){
+    *pipeXaxis = 128;
+    *pipeTopHeight = random(30,55);
+    score++;
+  }
+}
+
 void loop() {
  if(gameOver){
   showGameOver();
@@ -112,23 +136,23 @@ void loop() {
   velocity +=gravity;
   birdYaxis += velocity;
 
-  pipeXaxis -= 2;
-  if(pipeXaxis < 0){
-    pipeXaxis = 128;
-    pipeTopHeight = random(30,55);
-    score++;
-  }
+  pipeXaxis_1 -= 2;
+  pipeXaxis_2 -= 2;
+  pipeXaxis_3 -= 2;
+  
+  //score check
+  Score(&pipeXaxis_1, &pipeTopHeight_1);
+  Score(&pipeXaxis_2, &pipeTopHeight_2);
+  Score(&pipeXaxis_3, &pipeTopHeight_3);
+
 // Falling bird Collision
   if(birdYaxis < 0 || birdYaxis > SCREEN_HEIGHT - 12){
     gameOver = true;
   }
 
-// Collision with Pipe
-  if(pipeXaxis < 20 && pipeXaxis > 0){
-    if( (birdYaxis )< 64 - pipeTopHeight || birdYaxis+12 > (64-(pipeTopHeight-pipeGap))){
-      gameOver = true;
-    }
-  }
+  isCollision(pipeXaxis_1, pipeTopHeight_1);
+  isCollision(pipeXaxis_2, pipeTopHeight_2);
+  isCollision(pipeXaxis_3, pipeTopHeight_3);
 
 // Saving HighScore
   if(score > highScore){
@@ -139,8 +163,18 @@ void loop() {
     do {
   // drawing commands
     u8g.drawBitmapP(10, birdYaxis, 3, 12, FlappyBird);
-    u8g.drawBitmapP(pipeXaxis, -pipeTopHeight, 2, 64, topBottomPipe);
-    u8g.drawBitmapP(pipeXaxis, (64-(pipeTopHeight-pipeGap)), 2, 64, topBottomPipe);
+
+    //pipe 1
+    u8g.drawBitmapP(pipeXaxis_1, -pipeTopHeight_1, 2, 64, topBottomPipe);
+    u8g.drawBitmapP(pipeXaxis_1, (64-(pipeTopHeight_1-pipeGap)), 2, 64, topBottomPipe);
+
+    //pipe 2
+    u8g.drawBitmapP(pipeXaxis_2, -pipeTopHeight_2, 2, 64, topBottomPipe);
+    u8g.drawBitmapP(pipeXaxis_2, (64-(pipeTopHeight_2-pipeGap)), 2, 64, topBottomPipe);
+
+    //pipe 3
+    u8g.drawBitmapP(pipeXaxis_3, -pipeTopHeight_3, 2, 64, topBottomPipe);
+    u8g.drawBitmapP(pipeXaxis_3, (64-(pipeTopHeight_3-pipeGap)), 2, 64, topBottomPipe);
 
     u8g.setFont(u8g_font_5x7);
     u8g.drawStr(0, 6, "Scrore: ");
@@ -152,10 +186,5 @@ void loop() {
     sprintf(bufferHi, "%d", highScore); // number → text
     u8g.drawStr(110, 6, bufferHi);
   } while (u8g.nextPage());
-
-  // Serial.println("pipeTopHeight");
-  // Serial.println(pipeTopHeight);
-  // Serial.println("birdYaxis");
-  // Serial.println(birdYaxis);
 
 }
