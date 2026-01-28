@@ -34,7 +34,6 @@ float velocity = 0;
 float gravity = 0.8;
 float jumpForce = -3.5;
 
-// Game state
 int score = 0;
 int highScore = 0;
 char bufferSC[20];
@@ -42,9 +41,9 @@ char bufferHi[20];
 bool gameOver = false;
 
 //Pipes 
-int pipeXaxis_1 = 128;
-int pipeXaxis_2 = 170.6;
-int pipeXaxis_3 = 213.2;
+float pipeXaxis_1 = 128;
+float pipeXaxis_2 = 170.6;
+float pipeXaxis_3 = 213.2;
 int pipeGap = 29;
 int pipeTopHeight_1;
 int pipeTopHeight_2;
@@ -103,7 +102,7 @@ void saveHighScore(){
 }
 
 //collision check
-void isCollision(int pipeXaxis, int pipeTopHeight){
+void isCollision(float pipeXaxis, int pipeTopHeight){
   // Collision with Pipe
   if(pipeXaxis < 20 && pipeXaxis > 0){
     if( (birdYaxis )< 64 - pipeTopHeight || birdYaxis+12 > (64-(pipeTopHeight-pipeGap))){
@@ -112,7 +111,7 @@ void isCollision(int pipeXaxis, int pipeTopHeight){
   }
 }
 
-void Score(int* pipeXaxis, int* pipeTopHeight){
+void Score(float* pipeXaxis, int* pipeTopHeight){
    if(*pipeXaxis < 0){
     *pipeXaxis = 128;
     *pipeTopHeight = random(30,55);
