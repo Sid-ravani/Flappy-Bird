@@ -3,7 +3,6 @@
 #include <Wire.h>
 #include <U8glib.h>
 
-
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
@@ -27,6 +26,7 @@ const unsigned char topBottomPipe [] PROGMEM = {
   };
 
 const int BUTTON_PIN = 2;
+const int BuzzerPin = 4;
 
 // Bird Physics
 float birdYaxis = 30;
@@ -53,8 +53,8 @@ void resetGame() {
   birdYaxis = 32;
   velocity = 0;
   pipeXaxis_1 = 128;
-  pipeXaxis_2 = 168;
-  pipeXaxis_3 = 208;
+  pipeXaxis_2 = 170.6;
+  pipeXaxis_3 = 213.2;
   score = 0;
   pipeTopHeight_1 = random(30,55);
   pipeTopHeight_2 = random(30,55);
@@ -65,14 +65,23 @@ void resetGame() {
 void setup() {
   
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BuzzerPin, OUTPUT);
   display.begin(SSD1306_SWITCHCAPVCC,0x3C);
-  display.clearDisplay();
-  display.display();
-  
-  resetGame();
-
   u8g.setFont(u8g_font_tpssb);
   u8g.setColorIndex(1);
+
+  display.clearDisplay();
+  u8g.firstPage();
+  do {
+  // drawing commands
+    u8g.drawBitmapP(56, 15, 3, 12, FlappyBird);
+    u8g.setFont(u8g_font_7x14B);
+    u8g.drawStr(25, 45, "FLAPPY BIRD");
+  }while (u8g.nextPage());
+
+  resetGame();
+
+  delay(3000);
 }
 
 void showGameOver(){
@@ -120,17 +129,28 @@ void Score(float* pipeXaxis, int* pipeTopHeight){
 }
 
 void loop() {
- if(gameOver){
-  showGameOver();
-  if(digitalRead(BUTTON_PIN)==LOW){
-    delay(200);
-    resetGame();
+
+  if(gameOver){
+    showGameOver();
+    tone(BuzzerPin, 1000); // 1kHz sound
+    delay(100); // short beep
+    noTone(BuzzerPin);
+    if(digitalRead(BUTTON_PIN)==LOW){
+      delay(200);
+      resetGame();
+    }
+    return;
   }
-  return;
- }
+
 
   if(digitalRead(BUTTON_PIN)==LOW){
     velocity = jumpForce;
+  }
+
+  if(digitalRead(BUTTON_PIN)==LOW){
+    tone(BuzzerPin, 1000); // 1kHz sound
+    delay(50); // short beep
+    noTone(BuzzerPin);
   }
 
   velocity +=gravity;
@@ -160,7 +180,7 @@ void loop() {
   }
 
   u8g.firstPage();
-    do {
+  do {
   // drawing commands
     u8g.drawBitmapP(10, birdYaxis, 3, 12, FlappyBird);
 
@@ -186,5 +206,4 @@ void loop() {
     sprintf(bufferHi, "%d", highScore); // number → text
     u8g.drawStr(110, 6, bufferHi);
   } while (u8g.nextPage());
-
 }
