@@ -8,6 +8,7 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
+
 const unsigned char FlappyBird [] PROGMEM = {
 	0x03, 0xf0, 0x00, 0x0c, 0x28, 0x00, 0x10, 0x44, 0x00, 0x78, 0x4a, 0x00, 0x84, 0x4a, 0x00, 0x82, 
 	0x22, 0x00, 0x82, 0x1f, 0x00, 0x44, 0x20, 0x80, 0x38, 0x5f, 0x00, 0x08, 0x21, 0x00, 0x06, 0x1f, 
@@ -84,7 +85,7 @@ void setup() {
   delay(3000);
 }
 
-void showGameOver(){
+int showGameOver(){
   display.clearDisplay();
   display.setTextSize(2);
   display.setTextColor(WHITE);
@@ -104,6 +105,12 @@ void showGameOver(){
   display.print(highScore);
 
   display.display();
+  
+  if(digitalRead(BUTTON_PIN)==LOW){
+      delay(200);
+      resetGame();
+      return;
+    }
 }
 
 void saveHighScore(){
@@ -131,14 +138,8 @@ void Score(float* pipeXaxis, int* pipeTopHeight){
 void loop() {
 
   if(gameOver){
+    
     showGameOver();
-    tone(BuzzerPin, 1000); // 1kHz sound
-    delay(100); // short beep
-    noTone(BuzzerPin);
-    if(digitalRead(BUTTON_PIN)==LOW){
-      delay(200);
-      resetGame();
-    }
     return;
   }
 
